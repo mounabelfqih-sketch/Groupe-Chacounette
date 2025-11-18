@@ -47,6 +47,8 @@
   <nav>
     <a href="#" onclick="showSection('photos')">Photos de Chacounette</a>
     <a href="#" onclick="showSection('actus')">Actualité</a>
+    <button onclick="showSection('musique')">Musique 🎵</button>
+
   </nav>
 
   <div id="photos" class="section active">
@@ -57,6 +59,16 @@
      <img src="IMG_0026.jpeg" width="300">
      <img src="IMG_0031.jpeg" width="300">
     <img src="IMG_0037.jpeg" width="300">
+<div id="musique" class="section">
+  <h2>Musique de Chacounette</h2>
+  <p>Écoute ici les musiques de Chacounette :</p>
+
+  <!-- Exemple d’intégration d’un fichier audio -->
+  <audio controls>
+    <source src="chacounette.mp3" type="audio/mpeg">
+    Ton navigateur ne supporte pas l'audio.
+  </audio>
+</div>
 
 
   </div>
