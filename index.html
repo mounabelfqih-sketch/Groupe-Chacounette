@@ -12,40 +12,37 @@
     nav a:hover { background: #666; }
     .section { display: none; padding: 20px; }
     .active { display: block; }
-    img { margin: 10px; }
 
-    /* Écran de connexion */
-    #login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: flex; justify-content: center; align-items: center; z-index: 9999; }
-    #login-box { background: white; padding: 30px; border-radius: 10px; text-align: center; width: 300px; }
-    #login-box input { width: 100%; padding: 10px; margin: 10px 0; }
-    #login-box button { padding: 10px 20px; background: #333; color: white; border: none; cursor: pointer; }
-    #login-box a { display: block; margin-top: 10px; color: #007bff; text-decoration: none; }
+    #login-container { text-align:center; padding:50px; }
+    #login-container input { padding:10px; margin:5px; width:200px; }
+    #login-container button { padding:10px 20px; margin:10px; }
+    #logout-btn { padding:10px 20px; margin:10px; cursor:pointer; }
   </style>
 </head>
 <body>
+  <header><h1>Groupe Chacounette</h1></header>
 
-  <!-- Écran de connexion -->
-  <div id="login-overlay">
-    <div id="login-box">
-      <h2>Connexion</h2>
-      <input type="text" id="username" placeholder="Identifiant" />
-      <input type="password" id="password" placeholder="Mot de passe" />
-      <button onclick="login()">Se connecter</button>
-      <a href="https://docs.google.com/forms/d/e/1FAIpQLSfL6B_rwDZooJwH4nCYdt1eo3DvAO6-a8IXFm73h0Vw18Dacw/viewform?usp=dialog" target="_blank">Devenir membre</a>
-    </div>
+  <!-- LOGIN -->
+  <div id="login-container">
+    <h2>Connectez-vous</h2>
+
+    <input type="email" id="email" placeholder="Email"><br>
+    <input type="password" id="password" placeholder="Mot de passe"><br>
+
+    <button onclick="login()">Se connecter</button>
+
+    <p id="login-error" style="color:red;"></p>
   </div>
 
-  <header>
-    <h1>Groupe Chacounette</h1>
-  </header>
-
-  <nav>
-    <a href="#" onclick="showSection('photos')">Photos de Chacounette 😸</a>
-    <a href="#" onclick="showSection('actus')">Actualité 📰</a>
-    <a href="#" onclick="showSection('musique')">Musique 🎹 🎶</a>
+  <!-- NAVIGATION -->
+  <nav id="site-nav" style="display:none;">
+    <a href="#" onclick="showSection('photos')">Photos</a>
+    <a href="#" onclick="showSection('actus')">Actualité</a>
+    <a href="#" onclick="showSection('musique')">Musique</a>
+    <button id="logout-btn" onclick="logout()">Se déconnecter</button>
   </nav>
 
-  <!-- PHOTOS -->
+  <!-- SECTIONS -->
   <div id="photos" class="section active">
     <h2>Photos de Chacounette</h2>
     <img src="D4050099-3DC6-4F4D-8454-06388CCC0060.jpeg" width="300">
@@ -55,52 +52,73 @@
     <img src="IMG_0037.jpeg" width="300">
   </div>
 
-  <!-- ACTUALITÉ -->
   <div id="actus" class="section">
     <h2>Actualité</h2>
-    <p>Le journal du 19 novembre 2025 est disponible!</p>
-
-    <!-- Commentaires Utterances -->
     <script src="https://utteranc.es/client.js"
-            repo="groupe-chacounette/groupe-chacounette-comments"
-            issue-term="pathname"
-            theme="github-light"
-            crossorigin="anonymous"
-            async>
+      repo="groupe-chacounette/GroupeChacounette"
+      issue-term="pathname"
+      theme="github-light"
+      crossorigin="anonymous"
+      async>
     </script>
   </div>
 
-  <!-- MUSIQUE -->
   <div id="musique" class="section">
     <h2>Musique de Chacounette</h2>
-    <p>Écoute ici :</p>
     <audio controls>
-      <source src="chacounette.mp3" type="audio/mpeg">
-      Ton navigateur ne supporte pas l'audio.
+      <source src="musique.mp3" type="audio/mpeg">
     </audio>
   </div>
 
+  <!-- FIREBASE -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+
   <script>
-    function showSection(id) {
-      document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
-      document.getElementById(id).classList.add('active');
-    }
+    const firebaseConfig = {
+      apiKey: "AIzaSyBZR8QC7Sqlge49_-TM-dFpdJPS3kW4fRM",
+      authDomain: "groupe-chacounette.firebaseapp.com",
+      projectId: "groupe-chacounette",
+      storageBucket: "groupe-chacounette.firebasestorage.app",
+      messagingSenderId: "760695116962",
+      appId: "1:760695116962:web:cbfec4a6777ea64b8bf3fb",
+      measurementId: "G-T0JQ2XR97E"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+
+    const loginContainer = document.getElementById("login-container");
+    const siteNav = document.getElementById("site-nav");
+
+    firebase.auth().onAuthStateChanged(user => {
+      if (user) {
+        loginContainer.style.display = "none";
+        siteNav.style.display = "flex";
+        showSection("photos");
+      } else {
+        loginContainer.style.display = "block";
+        siteNav.style.display = "none";
+      }
+    });
 
     function login() {
-      const user = document.getElementById('username').value;
-      const pass = document.getElementById('password').value;
-      const comptes = {
-        "chacounette-admin": "8124e",
-        "sylauliac48": "DHFGJ456hd",
-        "mouauliac91": "ETYRUT4657ghjf",
-        "ertyru": "fcghj"
-      };
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
 
-      if (comptes[user] && comptes[user] === pass) {
-        document.getElementById('login-overlay').style.display = 'none';
-      } else {
-        alert("Identifiants incorrects");
-      }
+      firebase.auth()
+        .signInWithEmailAndPassword(email, password)
+        .catch(err => {
+          document.getElementById("login-error").innerText = err.message;
+        });
+    }
+
+    function logout() {
+      firebase.auth().signOut();
+    }
+
+    function showSection(id) {
+      document.querySelectorAll(".section").forEach(sec => sec.classList.remove("active"));
+      document.getElementById(id).classList.add("active");
     }
   </script>
 </body>
